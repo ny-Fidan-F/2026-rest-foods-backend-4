@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.validator.constraints.URL;
 
 import java.util.UUID;
 
@@ -35,8 +34,7 @@ public class Menu {
 
     @NotNull
     @Positive
-    @Column(name = "price")
-    private double price;
+    private Double price;
 
     @NotBlank
     @Column(name = "category")
@@ -47,5 +45,5 @@ public class Menu {
     private String imgUrl;
 
     @Column(name = "chefsChoice")
-    private Boolean chefsChoice;
+    private boolean chefsChoice;
 }
