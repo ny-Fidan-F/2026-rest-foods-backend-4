@@ -2,10 +2,13 @@ package ch.noseryoung.restaurant.domain.menu;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.URL;
 
 import java.util.UUID;
 
@@ -26,15 +29,20 @@ public class Menu {
     @Column(name = "name")
     private String name;
 
+    @NotBlank
     @Column(name = "description")
     private String description;
 
+    @NotNull
+    @Positive
     @Column(name = "price")
     private double price;
 
+    @NotBlank
     @Column(name = "category")
     private String category;
 
+    @NotBlank
     @Column(name = "imgUrl")
     private String imgUrl;
 
