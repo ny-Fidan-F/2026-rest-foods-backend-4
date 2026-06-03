@@ -3,7 +3,9 @@ package ch.noseryoung.restaurant.domain.menu;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +26,10 @@ public class MenuService {
     public Menu getMenuById(UUID id) {
         logger.info("Getting menu with id: {}", id);
         return menuRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() -> {
+                    logger.warn("Menu with id {} not found", id);
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "Menu not found");
+                });
     }
 
     public List<Menu> getAllMenus() {
