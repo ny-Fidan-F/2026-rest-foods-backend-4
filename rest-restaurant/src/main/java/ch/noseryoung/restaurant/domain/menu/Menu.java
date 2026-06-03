@@ -1,6 +1,7 @@
 package ch.noseryoung.restaurant.domain.menu;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,4 +21,10 @@ public class Menu {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "menu_id")
     private UUID menuId;
+
+    @NotBlank
+    @Column(name = "name")
+    private String name;
+
+
 }
