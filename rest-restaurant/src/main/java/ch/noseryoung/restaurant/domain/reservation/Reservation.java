@@ -1,5 +1,6 @@
 package ch.noseryoung.restaurant.domain.reservation;
 
+import ch.noseryoung.restaurant.domain.table.RestaurantTable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,10 +11,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@jakarta.persistence.Table(name = "reservation")
+@Table(name = "reservation")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -40,8 +43,12 @@ public class Reservation {
     @NotBlank(message = "Reservee phone number cannot be blank")
     private String reserveePhoneNumber;
 
-    @ManyToOne
-    /* We have to use JoinColumn because it is an entity relationship */
-    @JoinColumn(name = "reservation_table")
-    private RestaurantTable table;
+    @ManyToMany
+    @JoinTable(
+        name = "reservation_restaurant_table",
+        joinColumns = @JoinColumn(name = "reservation_id"),
+        inverseJoinColumns = @JoinColumn(name = "table_id")
+    )
+    @Builder.Default
+    private Set<RestaurantTable> tables = new HashSet<>();
 }

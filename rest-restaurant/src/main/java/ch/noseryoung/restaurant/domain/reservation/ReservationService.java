@@ -3,6 +3,8 @@ package ch.noseryoung.restaurant.domain.reservation;
 import ch.noseryoung.restaurant.domain.exceptions.InvalidReservationException;
 import ch.noseryoung.restaurant.domain.exceptions.ReservationConflictException;
 import ch.noseryoung.restaurant.domain.exceptions.ResourceNotFoundException;
+import ch.noseryoung.restaurant.domain.table.RestaurantTable;
+import ch.noseryoung.restaurant.domain.table.TableRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,26 +37,34 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation with ID " + id + " not found"));
     }
 
-    private void validateReservation(Reservation reservation){
+    private void validateReservation(Reservation reservation) {
         validateReservationTimes(reservation.getStart(), reservation.getEnd());
 
-        if (reservation.getTable() == null) {
-            throw new InvalidReservationException("Reservation must be assigned to a table");
+        if (reservation.getTables() == null || reservation.getTables().isEmpty()) {
+            throw new InvalidReservationException("Reservation must be assigned to at least one table");
         }
     }
 
     public Reservation createReservation(Reservation reservation) {
-        log.info("Creating new reservation for reservee: {}", reservation.getReserveeLastName());
-        
         validateReservation(reservation);
 
-        RestaurantTable table = tableRepository.findById(reservation.getTable().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Table with ID " + reservation.getTable().getId() + " not found"));
+        java.util.Set<RestaurantTable> managedTables = new java.util.HashSet<>();
+        for (RestaurantTable table : reservation.getTables()) {
+            if (table.getId() == null) {
+                throw new InvalidReservationException("Table ID cannot be null");
+            }
+            RestaurantTable managedTable = tableRepository.findById(table.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Table with ID " + table.getId() + " not found"));
+            managedTables.add(managedTable);
+        }
 
-        validateTableCapacity(table, reservation.getNumberOfPeople());
-        checkTableAvailabilityForNewReservation(table.getId(), reservation.getStart(), reservation.getEnd());
+        List<Integer> tableNumbers = managedTables.stream().map(RestaurantTable::getTableNumber).sorted().toList();
+        log.info("Creating new reservation for reservee: {} at tables: {}", reservation.getReserveeLastName(), tableNumbers);
 
-        reservation.setTable(table);
+        validateTablesCapacity(managedTables, reservation.getNumberOfPeople());
+        checkTablesAvailability(managedTables, reservation.getStart(), reservation.getEnd());
+
+        reservation.setTables(managedTables);
         return reservationRepository.save(reservation);
     }
 
@@ -64,18 +74,28 @@ public class ReservationService {
 
         validateReservation(reservationDetails);
 
-        RestaurantTable table = tableRepository.findById(reservationDetails.getTable().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Table with ID " + reservationDetails.getTable().getId() + " not found"));
+        java.util.Set<RestaurantTable> managedTables = new java.util.HashSet<>();
+        for (RestaurantTable table : reservationDetails.getTables()) {
+            if (table.getId() == null) {
+                throw new InvalidReservationException("Table ID cannot be null");
+            }
+            RestaurantTable managedTable = tableRepository.findById(table.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Table with ID " + table.getId() + " not found"));
+            managedTables.add(managedTable);
+        }
 
-        validateTableCapacity(table, reservationDetails.getNumberOfPeople());
-        checkTableAvailabilityForExistingReservation(table.getId(), id, reservationDetails.getStart(), reservationDetails.getEnd());
+        List<Integer> tableNumbers = managedTables.stream().map(RestaurantTable::getTableNumber).sorted().toList();
+        log.info("Reservation details update: reservee: {} at tables: {}", reservationDetails.getReserveeLastName(), tableNumbers);
+
+        validateTablesCapacity(managedTables, reservationDetails.getNumberOfPeople());
+        checkTablesAvailabilityExcluding(managedTables, id, reservationDetails.getStart(), reservationDetails.getEnd());
 
         existingReservation.setStart(reservationDetails.getStart());
         existingReservation.setEnd(reservationDetails.getEnd());
         existingReservation.setNumberOfPeople(reservationDetails.getNumberOfPeople());
         existingReservation.setReserveeLastName(reservationDetails.getReserveeLastName());
         existingReservation.setReserveePhoneNumber(reservationDetails.getReserveePhoneNumber());
-        existingReservation.setTable(table);
+        existingReservation.setTables(managedTables);
 
         return reservationRepository.save(existingReservation);
     }
@@ -93,31 +113,36 @@ public class ReservationService {
         if (start.isAfter(end) || start.isEqual(end)) {
             throw new InvalidReservationException("Reservation start time must be before end time");
         }
-        if (start.isBefore(LocalDateTime.now().minusMinutes(5))) {
+        if (start.isBefore(LocalDateTime.now())) {
             throw new InvalidReservationException("Reservation start time cannot be in the past");
         }
     }
 
-    private void validateTableCapacity(RestaurantTable table, int people) {
+    private void validateTablesCapacity(java.util.Set<RestaurantTable> tables, int people) {
         if (people <= 0) {
             throw new InvalidReservationException("Number of people must be positive");
         }
-        if (table.getNumSeats() < people) {
-            throw new InvalidReservationException("Table capacity (" + table.getNumSeats() + ") is insufficient for " + people + " people");
+        int totalCapacity = tables.stream().mapToInt(RestaurantTable::getNumSeats).sum();
+        if (totalCapacity < people) {
+            throw new InvalidReservationException("Selected tables do not have enough total capacity");
         }
     }
 
-    private void checkTableAvailabilityForNewReservation(UUID tableId, LocalDateTime start, LocalDateTime end) {
-        List<Reservation> conflicts = reservationRepository.findOverlappingReservationsForTable(tableId, start, end);
-        if (!conflicts.isEmpty()) {
-            throw new ReservationConflictException("Table is already reserved during this time");
+    private void checkTablesAvailability(java.util.Set<RestaurantTable> tables, LocalDateTime start, LocalDateTime end) {
+        for (RestaurantTable table : tables) {
+            List<Reservation> conflicts = reservationRepository.findOverlappingReservationsForTable(table.getId(), start, end);
+            if (!conflicts.isEmpty()) {
+                throw new ReservationConflictException("Table " + table.getTableNumber() + " is already reserved during this time");
+            }
         }
     }
 
-    private void checkTableAvailabilityForExistingReservation(UUID tableId, UUID reservationId, LocalDateTime start, LocalDateTime end) {
-        List<Reservation> conflicts = reservationRepository.findOverlappingReservationsForTableExcluding(tableId, reservationId, start, end);
-        if (!conflicts.isEmpty()) {
-            throw new ReservationConflictException("Table is already reserved during this time");
+    private void checkTablesAvailabilityExcluding(java.util.Set<RestaurantTable> tables, UUID reservationId, LocalDateTime start, LocalDateTime end) {
+        for (RestaurantTable table : tables) {
+            List<Reservation> conflicts = reservationRepository.findOverlappingReservationsExcluding(table.getId(), reservationId, start, end);
+            if (!conflicts.isEmpty()) {
+                throw new ReservationConflictException("Table " + table.getTableNumber() + " is already reserved during this time");
+            }
         }
     }
 }

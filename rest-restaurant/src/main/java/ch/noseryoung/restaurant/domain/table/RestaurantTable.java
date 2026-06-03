@@ -1,6 +1,7 @@
-package ch.noseryoung.restaurant.domain.reservation;
+package ch.noseryoung.restaurant.domain.table;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -20,9 +21,11 @@ public class RestaurantTable {
     @Column(name = "table_id")
     private UUID id;
 
-    @Column(name = "table_number", unique = true, nullable = false)
+    @NotNull
+    @Column(name = "table_number")
     private int tableNumber;
 
-    @Column(name = "table_seats", nullable = false)
+    @NotNull
+    @Column(name = "table_seats")
     private int numSeats;
 }
