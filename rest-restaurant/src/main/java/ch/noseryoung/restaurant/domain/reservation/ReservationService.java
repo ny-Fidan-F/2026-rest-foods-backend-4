@@ -35,16 +35,20 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation with ID " + id + " not found"));
     }
 
+    private void validateReservation(Reservation reservation){
+        validateReservationTimes(reservation.getStart(), reservation.getEnd());
+
+        if (reservation.getTable() == null) {
+            throw new InvalidReservationException("Reservation must be assigned to a table");
+        }
+    }
+
     public Reservation createReservation(Reservation reservation) {
         log.info("Creating new reservation for reservee: {}", reservation.getReserveeLastName());
         
-        validateReservationTimes(reservation.getStart(), reservation.getEnd());
+        validateReservation(reservation);
 
-        if (reservation.getTable() == null || reservation.getTable().getId() == null) {
-            throw new InvalidReservationException("Reservation must be assigned to a table");
-        }
-
-        Table table = tableRepository.findById(reservation.getTable().getId())
+        RestaurantTable table = tableRepository.findById(reservation.getTable().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Table with ID " + reservation.getTable().getId() + " not found"));
 
         validateTableCapacity(table, reservation.getNumberOfPeople());
@@ -58,13 +62,9 @@ public class ReservationService {
         log.info("Updating reservation with ID: {}", id);
         Reservation existingReservation = getReservationById(id);
 
-        validateReservationTimes(reservationDetails.getStart(), reservationDetails.getEnd());
+        validateReservation(reservationDetails);
 
-        if (reservationDetails.getTable() == null || reservationDetails.getTable().getId() == null) {
-            throw new InvalidReservationException("Reservation must be assigned to a table");
-        }
-
-        Table table = tableRepository.findById(reservationDetails.getTable().getId())
+        RestaurantTable table = tableRepository.findById(reservationDetails.getTable().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Table with ID " + reservationDetails.getTable().getId() + " not found"));
 
         validateTableCapacity(table, reservationDetails.getNumberOfPeople());
@@ -98,12 +98,12 @@ public class ReservationService {
         }
     }
 
-    private void validateTableCapacity(Table table, int people) {
+    private void validateTableCapacity(RestaurantTable table, int people) {
         if (people <= 0) {
             throw new InvalidReservationException("Number of people must be positive");
         }
-        if (table.getSeats() < people) {
-            throw new InvalidReservationException("Table capacity (" + table.getSeats() + ") is insufficient for " + people + " people");
+        if (table.getNumSeats() < people) {
+            throw new InvalidReservationException("Table capacity (" + table.getNumSeats() + ") is insufficient for " + people + " people");
         }
     }
 
