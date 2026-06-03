@@ -28,4 +28,16 @@ public class Menu {
 
     @Column(name = "description")
     private String description;
+
+    @Column(name = "price")
+    private double price;
+
+    @Column(name = "category")
+    private String category;
+
+    @Column(name = "imgUrl")
+    private String imgUrl;
+
+    @Column(name = "chefsChoice")
+    private Boolean chefsChoice;
 }
