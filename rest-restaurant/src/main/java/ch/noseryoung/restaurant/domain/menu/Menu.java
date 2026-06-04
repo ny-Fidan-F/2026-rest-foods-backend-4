@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.URL;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -53,6 +54,7 @@ public class Menu {
 
     @Column(name = "imgUrl")
     @Size(max = 300, message = "Image-Url must be at most 300 characters")
+    @URL(message = "Image-Url must be a valid URL")
     @Schema(description = "Menu image URL", example = "https://example.com/menu.jpg", requiredMode = Schema.RequiredMode.REQUIRED)
     private String imgUrl;
 
