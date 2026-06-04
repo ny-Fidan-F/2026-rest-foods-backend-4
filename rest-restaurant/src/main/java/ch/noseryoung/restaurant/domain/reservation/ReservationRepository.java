@@ -33,4 +33,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
         @Param("start") LocalDateTime start,
         @Param("end") LocalDateTime end
     );
+
+    @Query("SELECT COUNT(r) > 0 FROM Reservation r JOIN r.tables t WHERE t.id = :tableId")
+    boolean existsByTablesId(@Param("tableId") UUID tableId);
 }
