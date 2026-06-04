@@ -36,6 +36,10 @@ public class MenuService {
         return menuRepository.findByCategory(category);
     }
 
+    public List<Menu> getMenusByChefsChoice(boolean chefsChoice) {
+        return menuRepository.findByChefsChoice(chefsChoice);
+    }
+
     public List<Menu> getAllMenus() {
         logger.info("Getting all menus");
         return menuRepository.findAll();

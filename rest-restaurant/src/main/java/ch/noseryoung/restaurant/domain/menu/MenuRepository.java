@@ -9,4 +9,5 @@ import java.util.UUID;
 @Repository
 public interface MenuRepository extends JpaRepository<Menu, UUID> {
     List<Menu> findByCategory(String category);
+    List<Menu> findByChefsChoice(boolean chefsChoice);
 }

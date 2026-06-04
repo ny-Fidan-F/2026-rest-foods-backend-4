@@ -26,11 +26,15 @@ public class MenuController {
     @ApiResponse(responseCode = "200", description = "Menus retrieved")
     @GetMapping
     public ResponseEntity<List<Menu>> getAllMenus(
-            @Parameter(description = "Filter menus by category", example = "Pizza")
-            @RequestParam(required = false) String category) {
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) Boolean chefsChoice) {
 
         if (category != null && !category.isBlank()) {
             return ResponseEntity.ok(menuService.getMenusByCategory(category));
+        }
+
+        if (chefsChoice != null) {
+            return ResponseEntity.ok(menuService.getMenusByChefsChoice(chefsChoice));
         }
 
         return ResponseEntity.ok(menuService.getAllMenus());
