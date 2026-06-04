@@ -22,10 +22,17 @@ public class MenuController {
     @Autowired
     private MenuService menuService;
 
-    @Operation(summary = "Get all menus")
+    @Operation(summary = "Get all menus", description = "Retrieves all menus or filters them by category")
     @ApiResponse(responseCode = "200", description = "Menus retrieved")
     @GetMapping
-    public ResponseEntity<List<Menu>> getAllMenus() {
+    public ResponseEntity<List<Menu>> getAllMenus(
+            @Parameter(description = "Filter menus by category", example = "Pizza")
+            @RequestParam(required = false) String category) {
+
+        if (category != null && !category.isBlank()) {
+            return ResponseEntity.ok(menuService.getMenusByCategory(category));
+        }
+
         return ResponseEntity.ok(menuService.getAllMenus());
     }
 
