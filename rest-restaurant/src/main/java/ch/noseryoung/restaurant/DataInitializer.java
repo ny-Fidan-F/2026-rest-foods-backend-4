@@ -31,7 +31,6 @@ public class DataInitializer implements CommandLineRunner {
         if (tableRepository.count() == 0) {
             log.info("No tables found. Initializing realistic test tables...");
 
-            // Create tables
             RestaurantTable t1 = RestaurantTable.builder().numSeats(2).build();
             RestaurantTable t2 = RestaurantTable.builder().numSeats(4).build();
             RestaurantTable t3 = RestaurantTable.builder().numSeats(4).build();
@@ -52,7 +51,6 @@ public class DataInitializer implements CommandLineRunner {
             RestaurantTable t1 = tables.get(0);
             RestaurantTable t2 = tables.size() > 1 ? tables.get(1) : t1;
 
-            // Create some realistic reservations in the near future (e.g. tomorrow)
             LocalDateTime tomorrow18 = LocalDateTime.now().plusDays(1).withHour(18).withMinute(0).withSecond(0).withNano(0);
             LocalDateTime tomorrow20 = tomorrow18.plusHours(2);
             

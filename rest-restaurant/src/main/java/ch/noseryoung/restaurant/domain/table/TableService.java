@@ -1,6 +1,7 @@
 package ch.noseryoung.restaurant.domain.table;
 
 import ch.noseryoung.restaurant.domain.exceptions.InvalidReservationException;
+import ch.noseryoung.restaurant.domain.exceptions.ResourceAlreadyExistsException;
 import ch.noseryoung.restaurant.domain.exceptions.ResourceNotFoundException;
 import ch.noseryoung.restaurant.domain.reservation.Reservation;
 import ch.noseryoung.restaurant.domain.reservation.ReservationRepository;
@@ -41,9 +42,6 @@ public class TableService {
     public RestaurantTable createTable(RestaurantTable table) {
         log.info("Creating a new restaurant table");
 
-        if (table.getId() != null && tableRepository.existsById(table.getId())) {
-            throw new InvalidReservationException("Table with ID " + table.getId() + " already exists");
-        }
         return tableRepository.save(table);
     }
 

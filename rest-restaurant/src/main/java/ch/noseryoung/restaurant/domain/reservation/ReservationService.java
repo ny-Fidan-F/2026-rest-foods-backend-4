@@ -82,7 +82,7 @@ public class ReservationService {
         log.info("Updating reservation with ID: {}", id);
 
         if (reservationDetails.getId() != null){
-            throw new IllegalArgumentException("Updating ID of table is not allowed");
+            throw new InvalidReservationException("Updating ID of table is not allowed");
         }
 
         Reservation existingReservation = getReservationById(id);
