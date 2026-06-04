@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Getter
@@ -40,7 +41,7 @@ public class Menu {
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be positive")
     @Schema(description = "Menu price", example = "14.50", requiredMode = Schema.RequiredMode.REQUIRED)
-    private Double price;
+    private BigDecimal price;
 
     @NotBlank(message = "Category is required")
     @Column(name = "category")
