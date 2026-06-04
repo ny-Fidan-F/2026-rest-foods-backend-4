@@ -22,10 +22,6 @@ public class RestaurantTable {
     private UUID id;
 
     @NotNull
-    @Column(name = "table_number")
-    private int tableNumber;
-
-    @NotNull
     @Column(name = "table_seats")
-    private int numSeats;
+    private Integer numSeats;
 }

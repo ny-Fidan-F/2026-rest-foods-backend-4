@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -40,31 +42,39 @@ public class ReservationService {
     private void validateReservation(Reservation reservation) {
         validateReservationTimes(reservation.getStart(), reservation.getEnd());
 
-        if (reservation.getTables() == null || reservation.getTables().isEmpty()) {
+        if (reservation.getTables().isEmpty()) {
             throw new InvalidReservationException("Reservation must be assigned to at least one table");
         }
     }
 
-    public Reservation createReservation(Reservation reservation) {
-        validateReservation(reservation);
-
-        java.util.Set<RestaurantTable> managedTables = new java.util.HashSet<>();
+    private Set<RestaurantTable> getReservationTables(Reservation reservation) {
+        Set<RestaurantTable> managedTables = new java.util.HashSet<>();
         for (RestaurantTable table : reservation.getTables()) {
-            if (table.getId() == null) {
-                throw new InvalidReservationException("Table ID cannot be null");
-            }
+
             RestaurantTable managedTable = tableRepository.findById(table.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Table with ID " + table.getId() + " not found"));
             managedTables.add(managedTable);
         }
 
-        List<Integer> tableNumbers = managedTables.stream().map(RestaurantTable::getTableNumber).sorted().toList();
+        return managedTables;
+    }
+
+    private Set<UUID> getTableNumbers(Set<RestaurantTable> tables){
+        return tables.stream().map(RestaurantTable::getId).collect(Collectors.toSet());
+    }
+
+    public Reservation createReservation(Reservation reservation) {
+        validateReservation(reservation);
+
+        Set<RestaurantTable> tables = getReservationTables(reservation);
+        Set<UUID> tableNumbers  = getTableNumbers(tables);
+
         log.info("Creating new reservation for reservee: {} at tables: {}", reservation.getReserveeLastName(), tableNumbers);
 
-        validateTablesCapacity(managedTables, reservation.getNumberOfPeople());
-        checkTablesAvailability(managedTables, reservation.getStart(), reservation.getEnd());
+        validateTablesCapacity(tables, reservation.getNumberOfPeople());
+        checkTablesAvailability(tables, reservation.getStart(), reservation.getEnd());
 
-        reservation.setTables(managedTables);
+        reservation.setTables(tables);
         return reservationRepository.save(reservation);
     }
 
@@ -74,28 +84,20 @@ public class ReservationService {
 
         validateReservation(reservationDetails);
 
-        java.util.Set<RestaurantTable> managedTables = new java.util.HashSet<>();
-        for (RestaurantTable table : reservationDetails.getTables()) {
-            if (table.getId() == null) {
-                throw new InvalidReservationException("Table ID cannot be null");
-            }
-            RestaurantTable managedTable = tableRepository.findById(table.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Table with ID " + table.getId() + " not found"));
-            managedTables.add(managedTable);
-        }
+        Set<RestaurantTable> tables = getReservationTables(reservationDetails);
+        Set<UUID> tableNumbers  = getTableNumbers(tables);
 
-        List<Integer> tableNumbers = managedTables.stream().map(RestaurantTable::getTableNumber).sorted().toList();
         log.info("Reservation details update: reservee: {} at tables: {}", reservationDetails.getReserveeLastName(), tableNumbers);
 
-        validateTablesCapacity(managedTables, reservationDetails.getNumberOfPeople());
-        checkTablesAvailabilityExcluding(managedTables, id, reservationDetails.getStart(), reservationDetails.getEnd());
+        validateTablesCapacity(tables, reservationDetails.getNumberOfPeople());
+        checkTablesAvailabilityExcluding(tables, id, reservationDetails.getStart(), reservationDetails.getEnd());
 
         existingReservation.setStart(reservationDetails.getStart());
         existingReservation.setEnd(reservationDetails.getEnd());
         existingReservation.setNumberOfPeople(reservationDetails.getNumberOfPeople());
         existingReservation.setReserveeLastName(reservationDetails.getReserveeLastName());
         existingReservation.setReserveePhoneNumber(reservationDetails.getReserveePhoneNumber());
-        existingReservation.setTables(managedTables);
+        existingReservation.setTables(tables);
 
         return reservationRepository.save(existingReservation);
     }
@@ -118,7 +120,7 @@ public class ReservationService {
         }
     }
 
-    private void validateTablesCapacity(java.util.Set<RestaurantTable> tables, int people) {
+    private void validateTablesCapacity(Set<RestaurantTable> tables, int people) {
         if (people <= 0) {
             throw new InvalidReservationException("Number of people must be positive");
         }
@@ -128,11 +130,11 @@ public class ReservationService {
         }
     }
 
-    private void checkTablesAvailability(java.util.Set<RestaurantTable> tables, LocalDateTime start, LocalDateTime end) {
+    private void checkTablesAvailability(Set<RestaurantTable> tables, LocalDateTime start, LocalDateTime end) {
         for (RestaurantTable table : tables) {
             List<Reservation> conflicts = reservationRepository.findOverlappingReservationsForTable(table.getId(), start, end);
             if (!conflicts.isEmpty()) {
-                throw new ReservationConflictException("Table " + table.getTableNumber() + " is already reserved during this time");
+                throw new ReservationConflictException("Table " + table.getId() + " is already reserved during this time");
             }
         }
     }
@@ -141,7 +143,7 @@ public class ReservationService {
         for (RestaurantTable table : tables) {
             List<Reservation> conflicts = reservationRepository.findOverlappingReservationsExcluding(table.getId(), reservationId, start, end);
             if (!conflicts.isEmpty()) {
-                throw new ReservationConflictException("Table " + table.getTableNumber() + " is already reserved during this time");
+                throw new ReservationConflictException("Table " + table.getId() + " is already reserved during this time");
             }
         }
     }
