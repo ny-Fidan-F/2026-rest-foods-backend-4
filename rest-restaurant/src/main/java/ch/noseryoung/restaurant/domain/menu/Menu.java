@@ -2,9 +2,7 @@ package ch.noseryoung.restaurant.domain.menu;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,31 +27,36 @@ public class Menu {
     private UUID menuId;
 
     @NotBlank(message = "Name is required")
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
+    @Size(max = 50, message = "Name must be at most 50 characters")
     @Schema(description = "Menu name", example = "Pizza Margherita", requiredMode = Schema.RequiredMode.REQUIRED)
     private String name;
 
     @NotBlank(message = "Description is required")
-    @Column(name = "description")
+    @Column(name = "description", nullable = false)
+    @Size(max = 500, message = "Description must be at most 50 characters")
     @Schema(description = "Menu description", example = "Classic pizza with tomato sauce and mozzarella", requiredMode = Schema.RequiredMode.REQUIRED)
     private String description;
 
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be positive")
+    @Column(name = "price")
+    @DecimalMin("0.01")
     @Schema(description = "Menu price", example = "14.50", requiredMode = Schema.RequiredMode.REQUIRED)
     private BigDecimal price;
 
     @NotBlank(message = "Category is required")
-    @Column(name = "category")
+    @Column(name = "category", nullable = false)
+    @Size(max = 50, message = "Category must be at most 50 characters")
     @Schema(description = "Menu category", example = "Pizza", requiredMode = Schema.RequiredMode.REQUIRED)
     private String category;
 
-    @NotBlank(message = "Image URL is required")
     @Column(name = "imgUrl")
+    @Size(max = 300, message = "Image-Url must be at most 300 characters")
     @Schema(description = "Menu image URL", example = "https://example.com/menu.jpg", requiredMode = Schema.RequiredMode.REQUIRED)
     private String imgUrl;
 
-    @Column(name = "chefsChoice")
+    @Column(name = "chefsChoice", nullable = false)
     @Schema(description = "Whether the menu is a chef's choice", example = "true")
     private boolean chefsChoice;
 }
