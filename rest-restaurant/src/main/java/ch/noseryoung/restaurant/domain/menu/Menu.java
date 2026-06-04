@@ -35,13 +35,13 @@ public class Menu {
 
     @NotBlank(message = "Description is required")
     @Column(name = "description", nullable = false)
-    @Size(max = 500, message = "Description must be at most 50 characters")
+    @Size(max = 500, message = "Description must be at most 500 characters")
     @Schema(description = "Menu description", example = "Classic pizza with tomato sauce and mozzarella", requiredMode = Schema.RequiredMode.REQUIRED)
     private String description;
 
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be positive")
-    @Column(name = "price")
+    @Column(name = "price", nullable = false)
     @DecimalMin("0.01")
     @Schema(description = "Menu price", example = "14.50", requiredMode = Schema.RequiredMode.REQUIRED)
     private BigDecimal price;
@@ -55,7 +55,7 @@ public class Menu {
     @Column(name = "imgUrl")
     @Size(max = 300, message = "Image-Url must be at most 300 characters")
     @URL(message = "Image-Url must be a valid URL")
-    @Schema(description = "Menu image URL", example = "https://example.com/menu.jpg", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Menu image URL", example = "https://example.com/menu.jpg")
     private String imgUrl;
 
     @Column(name = "chefsChoice", nullable = false)
