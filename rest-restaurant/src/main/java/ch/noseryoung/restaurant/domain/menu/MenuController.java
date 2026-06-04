@@ -48,7 +48,7 @@ public class MenuController {
     @GetMapping("/{id}")
     public ResponseEntity<Menu> getMenuById(
             @Parameter(description = "Menu id", required = true, example = "550e8400-e29b-41d4-a716-446655440000")
-            @PathVariable UUID id) {
+            @PathVariable("id") UUID id) {
 
         return ResponseEntity.ok(menuService.getMenuById(id));
     }
@@ -74,7 +74,7 @@ public class MenuController {
     @PutMapping("/{id}")
     public ResponseEntity<Menu> updateMenu(
             @Parameter(description = "Menu id", required = true, example = "550e8400-e29b-41d4-a716-446655440000")
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @Valid @RequestBody Menu menu) {
 
         return ResponseEntity.ok(menuService.updateMenu(id, menu));
@@ -88,7 +88,7 @@ public class MenuController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMenu(
             @Parameter(description = "Menu id", required = true, example = "550e8400-e29b-41d4-a716-446655440000")
-            @PathVariable UUID id) {
+            @PathVariable("id") UUID id) {
 
         menuService.deleteMenu(id);
         return ResponseEntity.noContent().build();
