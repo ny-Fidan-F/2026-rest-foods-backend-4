@@ -1,9 +1,7 @@
 package ch.noseryoung.restaurant.domain.table;
 
 import ch.noseryoung.restaurant.domain.exceptions.InvalidReservationException;
-import ch.noseryoung.restaurant.domain.exceptions.ResourceAlreadyExistsException;
 import ch.noseryoung.restaurant.domain.exceptions.ResourceNotFoundException;
-import ch.noseryoung.restaurant.domain.reservation.Reservation;
 import ch.noseryoung.restaurant.domain.reservation.ReservationRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -45,7 +41,6 @@ public class TableService {
         return tableRepository.save(table);
     }
 
-
     public RestaurantTable updateTable(UUID id, RestaurantTable tableDetails) {
         log.info("Updating table with ID: {}", id);
 
@@ -54,7 +49,6 @@ public class TableService {
         existingTable.setNumSeats(tableDetails.getNumSeats());
         return tableRepository.save(existingTable);
     }
-
 
     public void deleteTable(UUID id) {
         log.info("Deleting table with ID: {}", id);

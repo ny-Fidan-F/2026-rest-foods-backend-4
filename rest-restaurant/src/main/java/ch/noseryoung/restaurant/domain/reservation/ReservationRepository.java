@@ -28,12 +28,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, UUID> 
         @Param("end") LocalDateTime end
     );
 
-    @Query("SELECT r FROM Reservation r WHERE r.start < :end AND r.end > :start")
-    List<Reservation> findOverlappingReservations(
-        @Param("start") LocalDateTime start,
-        @Param("end") LocalDateTime end
-    );
-
     @Query("SELECT COUNT(r) > 0 FROM Reservation r JOIN r.tables t WHERE t.id = :tableId")
     boolean existsByTablesId(@Param("tableId") UUID tableId);
 }
