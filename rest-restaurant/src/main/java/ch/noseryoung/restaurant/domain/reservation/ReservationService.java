@@ -41,9 +41,21 @@ public class ReservationService {
 
     private void validateReservation(Reservation reservation) {
         validateReservationTimes(reservation.getStart(), reservation.getEnd());
+        validatePhoneNumber(reservation.getReserveePhoneNumber());
 
         if (reservation.getTables().isEmpty()) {
             throw new InvalidReservationException("Reservation must be assigned to at least one table");
+        }
+    }
+
+    private void validatePhoneNumber(String phoneNumber) {
+        /* made by AI */
+        if (phoneNumber == null || phoneNumber.isBlank()) {
+            throw new InvalidReservationException("Phone number cannot be empty");
+        }
+        String digitsOnly = phoneNumber.replaceAll("[\\s()\\-]", "");
+        if (!digitsOnly.matches("\\+?\\d{7,15}")) {
+            throw new InvalidReservationException("Phone number must be a valid format (e.g. +41 79 123 45 67)");
         }
     }
 
