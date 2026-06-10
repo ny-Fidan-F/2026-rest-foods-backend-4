@@ -3,6 +3,7 @@ package ch.noseryoung.restaurant.domain.table;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 
 import java.util.UUID;
@@ -26,6 +27,7 @@ public class RestaurantTable {
     private UUID id;
 
     @NotNull
+    @Positive(message = "Number of seats must be positive")
     @Column(name = "table_seats")
     @Schema(description = "Number of seats at the table", example = "4")
     private Integer numSeats;
