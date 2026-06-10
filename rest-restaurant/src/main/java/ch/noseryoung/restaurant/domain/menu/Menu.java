@@ -30,26 +30,26 @@ public class Menu {
     @NotBlank(message = "Name is required")
     @Column(name = "name", nullable = false)
     @Size(max = 50, message = "Name must be at most 50 characters")
-    @Schema(description = "Menu name", example = "Pizza Margherita", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Menu name", example = "Pizza Margherita")
     private String name;
 
     @NotBlank(message = "Description is required")
     @Column(name = "description", nullable = false)
     @Size(max = 500, message = "Description must be at most 500 characters")
-    @Schema(description = "Menu description", example = "Classic pizza with tomato sauce and mozzarella", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Menu description", example = "Classic pizza with tomato sauce and mozzarella")
     private String description;
 
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be positive")
     @Column(name = "price", nullable = false)
     @DecimalMin("0.01")
-    @Schema(description = "Menu price", example = "14.50", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Menu price", example = "14.50")
     private BigDecimal price;
 
     @NotBlank(message = "Category is required")
     @Column(name = "category", nullable = false)
     @Size(max = 50, message = "Category must be at most 50 characters")
-    @Schema(description = "Menu category", example = "Pizza", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Menu category", example = "Pizza")
     private String category;
 
     @Column(name = "imgUrl")
