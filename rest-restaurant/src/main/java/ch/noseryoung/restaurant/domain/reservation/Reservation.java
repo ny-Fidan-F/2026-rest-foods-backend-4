@@ -4,6 +4,7 @@ import ch.noseryoung.restaurant.domain.table.RestaurantTable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
@@ -52,6 +53,7 @@ public class Reservation {
     @Schema(description = "Contact phone number", example = "+41 79 123 45 67")
     private String reserveePhoneNumber;
 
+    @NotEmpty(message = "Must have at least one table")
     @ManyToMany
     @JoinTable(
         name = "reservation_restaurant_table",
